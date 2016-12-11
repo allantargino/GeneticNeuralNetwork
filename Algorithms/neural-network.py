@@ -13,7 +13,10 @@ def int_to_bin_vec(int_num, max_length):
         binary_vec = temp + binary_vec
     return binary_vec
 
-
+def bin_vec_to_int(bin_vec):
+    str_num = '0b' + ''.join(bin_vec)
+    int_num = int(str_num, 2)
+    return int_num
 
 
 # X = [[0., 0.], [1., 1.], [2., 2.], [3., 3.]]
