@@ -1,30 +1,43 @@
 import math
 from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import r2_score
 
-def int_to_bin_vec(int_num, max_length):
-    binary = bin(int_num)
-    binary_vec = list(binary[2:])
-    if  len(binary_vec) > max_length:
-        return []
-    if len(binary_vec) < max_length:
-        temp = []
-        for i in range(0,(max_length- len(binary_vec))):
-            temp +='0' 
-        binary_vec = temp + binary_vec
-    return binary_vec
+# Parameters:
+train_perc = 0.8
 
-def bin_vec_to_int(bin_vec):
-    str_num = '0b' + ''.join(bin_vec)
-    int_num = int(str_num, 2)
-    return int_num
+# Data:
+x = [[0., 0.], [1., 1.], [2., 2.], [3., 3.], [4., 4.], [5., 5.], [6., 6.], [7., 7.]]
+y = [0., 1., 2., 3., 4., 5., 6., 7.]
+
+# Data sampling:
+x_len = len(x)
+n_elem = int(math.floor(x_len*train_perc))
+
+train_data = x[0:n_elem]
+train_labels = y[0:n_elem]
+test_data = x[n_elem:x_len]
+test_labels = y[n_elem:x_len]
+
+# Regression using neural network:
+clf = MLPRegressor(solver='lbfgs',
+                    alpha=1e-4,
+                    hidden_layer_sizes=(3,),
+                    max_iter=200, learning_rate_init=1e-3,
+                    random_state=7)
+
+# Train the network:
+clf.fit(train_data,train_labels)
+
+# Scores the validation set:
+scored_labels = clf.predict(test_data)
+
+# Outputs the results:
+print 'R^2:'
+print r2_score(test_labels, scored_labels)
 
 
-# X = [[0., 0.], [1., 1.], [2., 2.], [3., 3.]]
-# y = [0., 1., 2., 3.]
-# clf = MLPRegressor(solver='lbfgs', alpha=1e-4, hidden_layer_sizes=(3,), max_iter=200, learning_rate_init=1e-3, verbose='false', random_state=7)
-
-# clf.fit(X, y)
-# # # result = clf.predict([[2., 2.], [-1., -2.]])
+#print test_data
+#print scored_labels
 # print 'Result'
 # print clf.predict([[2.3, 2.3]])
 # # print result
