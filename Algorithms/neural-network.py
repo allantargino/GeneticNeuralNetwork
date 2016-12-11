@@ -36,7 +36,6 @@ print 'R^2:'
 print r2_score(test_labels, scored_labels)
 
 
-
 #print test_data
 #print scored_labels
 # print 'Result'
