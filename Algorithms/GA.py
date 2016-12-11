@@ -1,6 +1,54 @@
-from random import shuffle, randrange, randint, choice, random
-import Queue as Q
 import math
+import Queue as Q
+from random import shuffle, randrange, randint, choice, random
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import r2_score
+
+def int_to_bin_vec(int_num, max_length):
+    binary = bin(int_num)
+    binary_vec = list(binary[2:])
+    if  len(binary_vec) > max_length:
+        return []
+    if len(binary_vec) < max_length:
+        temp = []
+        for i in range(0,(max_length- len(binary_vec))):
+            temp +='0' 
+        binary_vec = temp + binary_vec
+    return binary_vec
+
+def bin_vec_to_int(bin_vec):
+    str_num = '0b' + ''.join(bin_vec)
+    int_num = int(str_num, 2)
+    return int_num
+
+def MLP(seed, train_perc):
+    # Data sampling:
+    x_len = len(x)
+    n_elem = int(math.floor(x_len*train_perc))
+
+    train_data = x[0:n_elem]
+    train_labels = y[0:n_elem]
+    test_data = x[n_elem:x_len]
+    test_labels = y[n_elem:x_len]
+
+    # Regression using neural network:
+    clf = MLPRegressor(solver='lbfgs',
+                        alpha=1e-4,
+                        hidden_layer_sizes=(3,),
+                        max_iter=200, learning_rate_init=1e-3,
+                        random_state=seed)
+
+    # Train the network:
+    clf.fit(train_data,train_labels)
+
+    # Scores the validation set:
+    scored_labels = clf.predict(test_data)
+
+    # Outputs the results:
+    r2= r2_score(test_labels, scored_labels)
+#     print 'R^2:'
+#     print r2
+    return r2
 
 def split_list(lista, idx):
         l1=[]
@@ -13,10 +61,10 @@ def split_list(lista, idx):
 
 def croms_ini(tc, pop_ini):
         croms=[]
+        limit = int(math.pow(2, tc))
         for _ in range(pop_ini):
-                crom=[]
-                for _ in range(tc):
-                      crom+=[randint(0,1)]
+                num=randint(0,limit)
+                crom = int_to_bin_vec(num, tc)
                 croms+=[crom]
         return croms
 
@@ -32,16 +80,13 @@ def cruzamento(n_filhos, tc, X, Y):
                 filhos+= [F1] + [F2]
         return filhos
 
-def calc_fitness(croms, ini, obj, w, h):
+def calc_fitness(croms, train_perc):
         fitness=[]
-        obj_ = posidx(obj,w)
-        for i in range(len(croms)):
-                croms[i]
-                f = posfinal(croms[i], nwabs, ini,obj,w,h)
-                f_ = posidx(f,w)
-                x = f_[0]-obj_[0]
-                y = f_[1]-obj_[1]
-                fitness+=[(w-1)*(h-1)-(abs(x)+abs(y))]
+        l = len(croms)
+        for i in range(l):
+                seed = bin_vec_to_int(croms[i])
+                r2 = MLP(seed, train_perc)
+                fitness+=[round(r2, 2)]
         return fitness
 
 def calc_prob(fitness):
@@ -63,27 +108,28 @@ def roleta(croms, prob, croms_passados):
                                 break 
         return novos_croms
 
-def GA(ini, obj,w,h):
+def GA(objetivo_max, bits_busca, train_perc):
         # Parametros:
-        # Tamanho do Cromossomo (Pior caso (h*w>2)):
-        tc=(w*h-1)*2
+        # Tamanho do Cromossomo (Maximo valor da seed 2^tc):
+        tc=bits_busca
         # Populacao Inicial:
-        n_pop_ini=50
+        n_pop_ini=3
         # Numero de filhos resultantes do Cruzamento:
-        n_filhos=2*3
+        n_filhos=2*n_pop_ini
         # Numero maximo de geracoes:
         max_geracoes=100
         geracao=0
         # Numero de cromossos passados por geracao:
         croms_passados=n_pop_ini*3/4
         
-        # ==> POPULACAOO INICIAL:
+        # ==> POPULACAO INICIAL DE SEEDS:
         croms=croms_ini(tc,n_pop_ini)
 
         while True:
+                print ('====> GERACAO ' + str(geracao))
                 # ==> CRUZAMENTO:
                 X = choice(croms)
-                Y=choice(croms)
+                Y = choice(croms)
                 filhos=cruzamento(n_filhos, tc, X, Y)
                 croms+=filhos
 
@@ -91,21 +137,24 @@ def GA(ini, obj,w,h):
                 # i: index garante que os novos filhos nao sofrerao mutacao
                 i = randint(0,len(croms)-n_filhos-1)
                 j = randint(0,tc-1)
-                if croms[i][j]==0: croms[i][j]=1
-                else: croms[i][j]=0 
+                if croms[i][j]==str(0): croms[i][j]=str(1)
+                else: croms[i][j]=str(0) 
 
-                # ==> SELECAOO:
-                fitness=calc_fitness(croms,ini,obj,w,h)
-                fit_max=(w-1)*(h-1)
-                if fit_max in fitness:
-                        i=fitness.index(fit_max)
-                        return (True, croms[i], geracao)
+                # ==> SELECAO:
+                fitness=calc_fitness(croms, train_perc )
+                print fitness
+                fit_max=objetivo_max
+                for i in range(len(croms)):
+                        if fitness[i] >= fit_max:
+                                return (True, croms[i], geracao)
 
-                # Remove cromossomos com fitness=0:
-                while 0 in fitness:
-                        idx=fitness.index(0)
-                        del fitness[idx]
-                        del croms[idx]
+                # Remove cromossomos com fitness<=0:
+                i = len(croms)-1
+                while i>0:
+                        if fitness[i]<=0:
+                                del fitness[i]
+                                del croms[i]
+                        i-=1
 
                 # Distribuicao de probabilidade:
                 prob = calc_prob(fitness)
@@ -117,17 +166,26 @@ def GA(ini, obj,w,h):
 
                 geracao+=1
 
-w0=4
-h0=5
 
-b=GA(inicio,objetivo,w0,h0)
+# ---------------------------------------------------------------------------------------------
+# Parameters:
+train_perc_a = 0.5
+precisao_r2_max = 0.99
+bits_seed_busca = 10
+
+# Data:
+x = [[0., 0.], [1., 1.], [2., 2.], [3., 3.], [4., 4.], [5., 5.], [6., 6.], [7., 7.]]
+y = [0., 1., 2., 3., 4., 5., 6., 7.]
+
+b=GA(precisao_r2_max, bits_seed_busca, train_perc_a)
 
 if b[0]:
         print '===> SUCESSO'
         print str(b[2]) + ' geracoes'
         print '-> Cromossomo:'
         print b[1]
-
+        print '-> Seed:'
+        print bin_vec_to_int(b[1])
 else:
         print '===> FALHA'
         print 'Max_geracoes atingida: ' + str(b[2])
