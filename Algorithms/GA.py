@@ -23,7 +23,7 @@ def croms_ini(tc, pop_ini):
 def cruzamento(n_filhos, tc, X, Y):
         filhos=[]
         for _ in xrange(0,n_filhos,2):
-                # Garante que o corte garantirá ao menos um bit trocado:
+                # Garante que o corte garantira ao menos um bit trocado:
                 p = randint(1,tc-2)
                 X_=split_list(X,p)
                 Y_=split_list(Y,p)
@@ -64,20 +64,20 @@ def roleta(croms, prob, croms_passados):
         return novos_croms
 
 def GA(ini, obj,w,h):
-        # Parâmetros:
+        # Parametros:
         # Tamanho do Cromossomo (Pior caso (h*w>2)):
         tc=(w*h-1)*2
-        # População Inicial:
+        # Populacao Inicial:
         n_pop_ini=50
-        # Número de filhos resultantes do Cruzamento:
+        # Numero de filhos resultantes do Cruzamento:
         n_filhos=2*3
-        # Número máximo de gerações:
+        # Numero maximo de geracoes:
         max_geracoes=100
         geracao=0
-        # Número de cromossos passados por geração:
+        # Numero de cromossos passados por geracao:
         croms_passados=n_pop_ini*3/4
         
-        # ==> POPULAÇÃO INICIAL:
+        # ==> POPULACAOO INICIAL:
         croms=croms_ini(tc,n_pop_ini)
 
         while True:
@@ -87,14 +87,14 @@ def GA(ini, obj,w,h):
                 filhos=cruzamento(n_filhos, tc, X, Y)
                 croms+=filhos
 
-                # ==> MUTAÇÃO:
-                # i: index garante que os novos filhos não sofrerão mutação
+                # ==> MUTACAO:
+                # i: index garante que os novos filhos nao sofrerao mutacao
                 i = randint(0,len(croms)-n_filhos-1)
                 j = randint(0,tc-1)
                 if croms[i][j]==0: croms[i][j]=1
                 else: croms[i][j]=0 
 
-                # ==> SELEÇÃO:
+                # ==> SELECAOO:
                 fitness=calc_fitness(croms,ini,obj,w,h)
                 fit_max=(w-1)*(h-1)
                 if fit_max in fitness:
@@ -107,12 +107,12 @@ def GA(ini, obj,w,h):
                         del fitness[idx]
                         del croms[idx]
 
-                # Distribuição de probabilidade:
+                # Distribuicao de probabilidade:
                 prob = calc_prob(fitness)
                 # Roleta:
                 croms = roleta(croms, prob, croms_passados)
         
-                # ==> CRITÉRIO DE PARADA:
+                # ==> CRITERIO DE PARADA:
                 if geracao>=max_geracoes: return (False, [], geracao)
 
                 geracao+=1
