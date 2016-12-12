@@ -116,7 +116,7 @@ def GA(objetivo_max, bits_busca, elite_clones, max_gerac, train_perc, hidden_lay
         # Tamanho do Cromossomo (Maximo valor da seed 2^tc):
         tc=bits_busca
         # Populacao Inicial:
-        n_pop_ini=4
+        n_pop_ini=10
         # Numero de filhos resultantes do Cruzamento:
         n_filhos=2*n_pop_ini
         # Numero maximo de geracoes:
@@ -192,7 +192,8 @@ def GA(objetivo_max, bits_busca, elite_clones, max_gerac, train_perc, hidden_lay
 def get_Apartamentos():
     script_dir = os.path.dirname(__file__)
 #     rel_path = "../Datasets/apartamentos_mini.csv"
-    rel_path = "../Datasets/apartamentos_completo.csv"
+#     rel_path = "../Datasets/apartamentos_completo.csv"
+    rel_path = "../Datasets/apartamentos_moema.csv"
     filename = os.path.join(script_dir, rel_path)
     filename = os.path.abspath(os.path.realpath(filename))
 
@@ -200,7 +201,8 @@ def get_Apartamentos():
     with open(filename, 'rb') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            apartamentos+=[[int(row['min_area']), float(row['latitude_formatada']), float(row['longitude_formatada']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
+        #     apartamentos+=[[int(row['min_area']), float(row['latitude_formatada']), float(row['longitude_formatada']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
+            apartamentos+=[[int(row['min_area']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
     return apartamentos
 
 
@@ -208,12 +210,12 @@ def get_Apartamentos():
 
 # ---------------------------------------------------------------------------------------------
 # Parameters:
-train_perc = 0.5
+train_perc = 0.9
 elite_clones = 1
 precisao_r2_max = 0.90
-bits_seed_busca = 15
-hidden_layers_neur = 1000
-hidden_layers_size = 3
+bits_seed_busca = 20
+hidden_layers_neur = 10
+hidden_layers_size = 2
 max_geracoes = 100
 
 # Data:
@@ -222,8 +224,9 @@ max_geracoes = 100
 apt = get_Apartamentos()
 array_apt = np.array(apt)
 
-x = list(array_apt[:,[0, 1, 2, 3, 4, 5]])
-y = list(array_apt[:,6])
+# x = list(array_apt[:,[0, 1, 2, 3, 4, 5]])
+x = list(array_apt[:,[0, 1, 2, 3]])
+y = list(array_apt[:,4])
 
 
 b=GA(precisao_r2_max, bits_seed_busca, elite_clones, max_geracoes, train_perc, hidden_layers_neur, hidden_layers_size)
