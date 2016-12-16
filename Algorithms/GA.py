@@ -37,7 +37,7 @@ def MLP(seed, train_perc, hidden_layers_neur, hidden_layers_size):
     # Regression using neural network:
     clf = MLPRegressor(solver='lbfgs',
                         alpha=1e-4,
-                        hidden_layer_sizes=(3,1),
+                        hidden_layer_sizes=(hidden_layers_neur,hidden_layers_size),
                         max_iter=200, learning_rate_init=1e-3,
                         random_state=seed)
 
@@ -192,8 +192,8 @@ def GA(objetivo_max, bits_busca, elite_clones, max_gerac, train_perc, hidden_lay
 def get_Apartamentos():
     script_dir = os.path.dirname(__file__)
 #     rel_path = "../Datasets/apartamentos_mini.csv"
-#     rel_path = "../Datasets/apartamentos_completo.csv"
-    rel_path = "../Datasets/apartamentos_moema.csv"
+    rel_path = "../Datasets/apartamentos_completo.csv"
+#    rel_path = "../Datasets/apartamentos_moema.csv"
     filename = os.path.join(script_dir, rel_path)
     filename = os.path.abspath(os.path.realpath(filename))
 
@@ -201,7 +201,7 @@ def get_Apartamentos():
     with open(filename, 'rb') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-        #     apartamentos+=[[int(row['min_area']), float(row['latitude_formatada']), float(row['longitude_formatada']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
+            #apartamentos+=[[int(row['min_area']), float(row['latitude_formatada']), float(row['longitude_formatada']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
             apartamentos+=[[int(row['min_area']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
     return apartamentos
 
@@ -214,8 +214,8 @@ train_perc = 0.9
 elite_clones = 1
 precisao_r2_max = 0.90
 bits_seed_busca = 20
-hidden_layers_neur = 10
-hidden_layers_size = 2
+hidden_layers_neur = 100
+hidden_layers_size = 1
 max_geracoes = 100
 
 # Data:
@@ -224,7 +224,7 @@ max_geracoes = 100
 apt = get_Apartamentos()
 array_apt = np.array(apt)
 
-# x = list(array_apt[:,[0, 1, 2, 3, 4, 5]])
+#x = list(array_apt[:,[0, 1, 2, 3, 4, 5]])
 x = list(array_apt[:,[0, 1, 2, 3]])
 y = list(array_apt[:,4])
 
