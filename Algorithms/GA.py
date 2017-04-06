@@ -189,24 +189,6 @@ def GA(objetivo_max, bits_busca, elite_clones, max_gerac, train_perc, hidden_lay
                 geracao+=1
 
 
-def get_Apartamentos():
-    script_dir = os.path.dirname(__file__)
-#     rel_path = "../Datasets/apartamentos_mini.csv"
-#     rel_path = "../Datasets/apartamentos_completo.csv"
-    rel_path = "../Datasets/apartamentos_moema.csv"
-    filename = os.path.join(script_dir, rel_path)
-    filename = os.path.abspath(os.path.realpath(filename))
-
-    apartamentos = []
-    with open(filename, 'rb') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-        #     apartamentos+=[[int(row['min_area']), float(row['latitude_formatada']), float(row['longitude_formatada']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
-            apartamentos+=[[int(row['min_area']), int(row['quant_quartos']), int(row['quant_vagas']), int(row['quant_suites']), float(row['price'])]]
-    return apartamentos
-
-
-
 
 # ---------------------------------------------------------------------------------------------
 # Parameters:
@@ -221,12 +203,12 @@ max_geracoes = 100
 # Data:
 # x = [[0., 0.], [1., 1.], [2., 2.], [3., 3.], [4., 4.], [5., 5.], [6., 6.], [7., 7.]]
 # y = [0., 1., 2., 3., 4., 5., 6., 7.]
-apt = get_Apartamentos()
-array_apt = np.array(apt)
+dataset = ZapImoveisDataset("../Datasets/apartamentos_mini.csv").load
 
 # x = list(array_apt[:,[0, 1, 2, 3, 4, 5]])
-x = list(array_apt[:,[0, 1, 2, 3]])
-y = list(array_apt[:,4])
+training_set = TrainingSet(dataset,[0, 1, 2, 3],4)
+x = training_set.attribute_list
+y = training_set.label_list
 
 
 b=GA(precisao_r2_max, bits_seed_busca, elite_clones, max_geracoes, train_perc, hidden_layers_neur, hidden_layers_size)
