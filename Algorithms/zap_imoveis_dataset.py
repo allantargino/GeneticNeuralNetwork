@@ -1,5 +1,6 @@
 import csv
 import os
+import numpy as np
 
 
 class ZapImoveisDataset:
@@ -12,4 +13,7 @@ class ZapImoveisDataset:
     def load(self):
         with open(filename, 'rb') as csvfile:
             reader = csv.DictReader(csvfile)
-            return [[row['min_area'], row['latitude_formatada'], row['longitude_formatada'], row['quant_quartos'], row['quant_vagas'],row['quant_suites'], row['price']] for row in reader]
+            return np.array( \
+            	[[row['min_area'], row['latitude_formatada'], \
+            	row['longitude_formatada'], row['quant_quartos'], \
+            	row['quant_vagas'],row['quant_suites'], row['price']] for row in reader])
